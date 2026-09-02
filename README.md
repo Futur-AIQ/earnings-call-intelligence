@@ -1,6 +1,6 @@
 # Earnings Call Intelligence
 
-An AI-powered system for analyzing earnings call transcript PDFs. It extracts structured Q&A units, identifies speakers and their roles, detects strategic statements, and provides an interactive web interface with a streaming chatbot — all running locally via Ollama.
+An AI-powered system for analyzing earnings call transcript PDFs. It extracts structured Q&A units, identifies speakers and their roles, detects strategic statements, and provides an interactive web interface with a streaming chatbot — powered by OpenRouter-hosted LLMs.
 
 ---
 
@@ -47,8 +47,8 @@ JSON files  ──▶  FastAPI Backend  ──▶  React Frontend
 | Library | Purpose |
 |---------|---------|
 | `pdfplumber` | PDF text extraction |
-| `langchain` + `langchain-ollama` | LLM orchestration |
-| `Ollama` | Local LLM inference (`gpt-oss:20b`, fallback `gemma3:latest`) |
+| `langchain` + `langchain-openai` | LLM orchestration |
+| `OpenRouter` | Hosted LLM inference (`openai/gpt-oss-20b`, fallback `google/gemma-3-27b-it`) |
 | `pydantic` + `pydantic-settings` | Data models and `.env` config |
 | `rapidfuzz` | Speaker name deduplication (fuzzy matching) |
 | `structlog` | Structured logging |
@@ -67,12 +67,7 @@ JSON files  ──▶  FastAPI Backend  ──▶  React Frontend
 
 - **Python 3.10+**
 - **Node.js 18+** (only for rebuilding the frontend)
-- **[Ollama](https://ollama.com)** running locally with at least one model pulled:
-
-```bash
-ollama pull gpt-oss:20b      # primary model
-ollama pull gemma3:latest    # fallback model
-```
+- An **[OpenRouter](https://openrouter.ai)** API key (used by both the pipeline and the chatbot; no local model install needed)
 
 ---
 
@@ -93,15 +88,14 @@ pip install -e .
 
 ### 2. Configure environment
 
-Copy `.env` and set your model:
+Copy `.env.example` to `.env` and add your OpenRouter API key:
 
 ```env
-LLM_OLLAMA_BASE_URL=http://localhost:11434
-# LLM_MODEL_NAME=gpt-oss:20b     ← default (hardcoded), uncomment to override
-LLM_FALLBACK_MODEL_NAME=gemma3:latest
+OPENROUTER_API_KEY=sk-or-...
+LLM_MODEL_NAME=openai/gpt-oss-20b          # default, override to switch models
+LLM_FALLBACK_MODEL_NAME=google/gemma-3-27b-it
 LLM_TEMPERATURE=0.0
-LLM_REQUEST_TIMEOUT=300
-LLM_NUM_CTX=16384
+LLM_REQUEST_TIMEOUT=120
 ```
 
 ### 3. Start the web application
@@ -109,6 +103,7 @@ LLM_NUM_CTX=16384
 ```bash
 cd backend
 pip install -r requirements.txt
+# create backend/.env with JWT_SECRET_KEY, MySQL creds (auth), and OPENROUTER_API_KEY (chatbot)
 uvicorn main:app --reload --port 8100
 ```
 
@@ -162,7 +157,7 @@ earnings-call-intelligence/
 ├── src/                            # Pipeline source code
 │   ├── cli.py                      # CLI entry point (eci command)
 │   ├── llm/
-│   │   └── client.py               # OllamaLLM client, model settings
+│   │   └── client.py               # OpenRouter (ChatOpenAI) client, model settings
 │   ├── extraction/
 │   │   └── pdf_extractor.py        # pdfplumber PDF extraction
 │   └── pipeline_v2/                # Current pipeline (V2)
@@ -211,14 +206,14 @@ earnings-call-intelligence/
 
 ## LLM Models
 
-| Component | Model | Fallback | Context Window |
-|-----------|-------|----------|----------------|
-| Pipeline (all stages) | `gpt-oss:20b` | `gemma3:latest` | 16 384 tokens |
-| Chatbot | `gpt-oss:20b` | — | 65 536 tokens |
+| Component | Model | Fallback | Notes |
+|-----------|-------|----------|-------|
+| Pipeline (all stages) | `openai/gpt-oss-20b` | `google/gemma-3-27b-it` | via OpenRouter |
+| Chatbot | `openai/gpt-oss-20b` (override with `CHAT_LLM_MODEL`) | — (no fallback) | via OpenRouter, own `OPENROUTER_API_KEY` in `backend/.env` |
 
-The pipeline retries failed LLM calls up to 3 times with escalating temperature (`0.0 → 0.2 → 0.5`), then falls back to `gemma3:latest`.
+The pipeline retries failed LLM calls up to 3 times with escalating temperature (`0.0 → 0.2 → 0.5`), then falls back to `google/gemma-3-27b-it`.
 
-To switch the pipeline model, set `LLM_MODEL_NAME=gemma3:latest` in `.env`.
+To switch the pipeline model, set `LLM_MODEL_NAME=` in `.env` to any [OpenRouter model slug](https://openrouter.ai/models).
 
 ---
 
@@ -263,7 +258,8 @@ rm -rf backend/data/uploads/*
 
 ## Known Limitations
 
-- **`gpt-oss:20b` EOS loops** — the model occasionally returns empty responses on certain prompt content. The pipeline handles this with retries and a `gemma3:latest` fallback, but a ~5% failure rate on individual blocks is normal.
-- **Long transcripts** — very large PDFs (100+ pages) may approach the context window limit for some stages. The chatbot uses a 65K context window to mitigate this.
+- **`gpt-oss-20b` EOS loops** — the model occasionally returns empty responses on certain prompt content, even via OpenRouter. The pipeline handles this with retries and a `google/gemma-3-27b-it` fallback, but a ~5% failure rate on individual blocks is normal. The chatbot has no model fallback — an empty response there is retried once with a simplified prompt.
+- **Long transcripts** — very large PDFs (100+ pages) may approach the context window limit for some stages.
+- **No offline mode** — the pipeline and chatbot require network access to OpenRouter; there is no local-model fallback.
 - **Windows console encoding** — Unicode characters in log output may cause issues on Windows. Use `PYTHONIOENCODING=utf-8` if needed.
 - **Synchronous pipeline** — the pipeline runs all stages sequentially in a thread pool. There is no parallelism between stages.

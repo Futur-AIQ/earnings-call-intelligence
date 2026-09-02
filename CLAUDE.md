@@ -11,10 +11,12 @@ A Python pipeline that analyzes earnings call transcript PDFs and produces struc
 ### Pipeline
 - **Python 3.10+** (pyproject.toml requires `>=3.10`; README says 3.12+ — 3.10 is the enforced minimum)
 - **LangChain / LangGraph** - LLM orchestration
-- **Ollama** - Local LLM inference
-  - Primary model: `gpt-oss:20b` (hardcoded default in `src/llm/client.py`)
-  - Fallback model: `gemma3:latest` (after 3 failed primary attempts)
-  - Override via `LLM_MODEL_NAME=` in `.env`
+- **OpenRouter** - Hosted LLM inference via `langchain-openai`'s `ChatOpenAI` pointed at OpenRouter's OpenAI-compatible endpoint (`src/llm/client.py`)
+  - Primary model: `openai/gpt-oss-20b` (default in `LLMSettings`)
+  - Fallback model: `google/gemma-3-27b-it` (after 3 failed primary attempts)
+  - Requires `OPENROUTER_API_KEY` in `.env`; override model via `LLM_MODEL_NAME=`
+  - `ChatOpenAI.invoke()`/`.stream()` return message objects, not strings — callers must read `.content`
+  - `src/config/settings.py` (used only by the legacy `src/pipeline/`, not `pipeline_v2`) still has old Ollama-style settings and was not part of this migration
 - **pdfplumber** - PDF text extraction
 - **Pydantic** - Data models and validation
 
@@ -164,7 +166,7 @@ backend/
 
 ### Chatbot (`backend/services/chat_agent.py` + `chat_data_loader.py`)
 
-**Model**: `gpt-oss:20b`, `num_ctx=65536`, `temperature=0.1`, `num_predict=4096` — hardcoded here, independent of the pipeline's `.env` LLM settings.
+**Model**: `openai/gpt-oss-20b` via OpenRouter (override with `CHAT_LLM_MODEL` env var), `temperature=0.1`, `max_tokens=4096` — configured independently of the pipeline's `.env` LLM settings. `LLM_NUM_CTX=65536` in `chat_agent.py` is now informational only (used for a "transcript may exceed context" warning), since OpenRouter — not this code — enforces the actual context window per model.
 **Transport**: SSE via `POST /runs/{run_id}/chat/stream`.
 
 ```
@@ -174,7 +176,7 @@ User question
     ├── load_full_transcript(run_id)  ← @lru_cache, reads pipeline_output.json
     ├── _build_prompt(): system (company/quarter + citation/no-fabrication rules) + full transcript
     │                     + last 5 history turns (assistant truncated to 1000 chars) + question
-    ├── OllamaLLM.stream() → SSE: event:metadata (retrieval_source) → event:token × N → event:done (citations, timing)
+    ├── ChatOpenAI.stream() (via OpenRouter) → SSE: event:metadata (retrieval_source) → event:token × N → event:done (citations, timing)
     └── Retry once on empty response (simplified prompt, non-streaming) — no model fallback here (see Known Issues)
 ```
 
@@ -185,20 +187,26 @@ Citations are extracted via regex over `[qa_XXX]`, `[page_N]`, `[speaker_XXX]` p
 ### Root `.env` (pipeline)
 
 ```env
-# LLM_MODEL_NAME=gemma3:latest      ← uncomment to switch primary model
-# LLM_MODEL_NAME=gpt-oss:20b        ← current default (hardcoded in src/llm/client.py)
-LLM_FALLBACK_MODEL_NAME=gemma3:latest
+OPENROUTER_API_KEY=                              ← required
+LLM_MODEL_NAME=openai/gpt-oss-20b                ← current default
+LLM_FALLBACK_MODEL_NAME=google/gemma-3-27b-it
 LLM_TEMPERATURE=0.0
-LLM_REQUEST_TIMEOUT=300
-LLM_NUM_CTX=16384                   ← pipeline context window
+LLM_REQUEST_TIMEOUT=120
 CHUNK_TARGET_TOKENS=2000
 CHUNK_OVERLAP_TOKENS=200
 ```
+
+Context window sizing (`LLM_NUM_CTX`) was dropped from `LLMSettings` — OpenRouter handles context per-model, unlike the old direct-to-Ollama `num_ctx` parameter.
 
 ### `backend/.env` (web app — not templated in `.env.example`, must be created manually)
 
 - `JWT_SECRET_KEY` (required — `api/auth.py` raises at import time if unset), `JWT_ALGORITHM` (default `HS256`), `JWT_EXPIRY_HOURS` (default 24)
 - `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE` (default `call_transcript`)
+- `OPENROUTER_API_KEY` (required for the chatbot — `chat_agent.py` raises `RuntimeError` on first chat request if unset, not at import time), `OPENROUTER_BASE_URL` (default `https://openrouter.ai/api/v1`), `CHAT_LLM_MODEL` (default `openai/gpt-oss-20b`) — chatbot config is read directly from `os.environ`, independent of the pipeline's `LLMSettings`
+
+### `frontend/.env` (optional, local dev only)
+
+- `VITE_SKIP_AUTH=true` bypasses the login screen client-side (sets a fake `local-dev`/`admin` user in `AuthContext.tsx`) for local setups where `backend/.env` has no MySQL configured. Backend routes are unauthenticated either way if MySQL init fails — this only affects the frontend gate, not real access control.
 
 ## Data Storage
 
@@ -217,6 +225,6 @@ curl -X DELETE http://localhost:8100/runs/{run_id}
 ## Known Issues
 
 1. **Windows console encoding** — avoid Unicode chars in console output; use `.encode('ascii', errors='replace')`.
-2. **gpt-oss:20b EOS loops** — ~30% empty-response rate on certain prompt content. Pipeline retries 3× with escalating temperature (0.0→0.2→0.5) then falls back to `gemma3:latest`. Non-ASCII characters and certain section headings trigger the loop.
-3. **Chatbot has no fallback model** — if `gpt-oss:20b` returns empty in the chatbot, only one simplified-prompt retry is attempted (no model switch, unlike the pipeline).
+2. **gpt-oss:20b EOS loops** — ~30% empty-response rate on certain prompt content, still observed when routed through OpenRouter. Pipeline retries 3× with escalating temperature (0.0→0.2→0.5) then falls back to `google/gemma-3-27b-it`. Non-ASCII characters and certain section headings trigger the loop.
+3. **Chatbot has no fallback model** — if `openai/gpt-oss-20b` returns empty in the chatbot, only one simplified-prompt retry is attempted (no model switch, unlike the pipeline). Chatbot also has no local fallback if OpenRouter itself is unreachable or `OPENROUTER_API_KEY` is missing/invalid — it raises rather than degrading.
 4. **`lru_cache` not invalidated on re-run** — re-analyzing the same `run_id` leaves the chatbot serving stale transcript data from `chat_data_loader.py`'s caches. Call `invalidate_cache()` or restart the backend.
