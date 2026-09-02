@@ -1,0 +1,290 @@
+You are building a speaker registry for an earnings call transcript.
+
+=== CRITICAL RULE: WHAT MAKES A REAL PERSON ===
+
+A REAL PERSON does NOT need to have spoken.
+
+If a name appears in ANY of these contexts, they ARE a REAL PERSON:
+- Management lists or opening remarks
+- Participant introductions
+- Moderator announcements ("Next question is from...")
+- Company executive listings
+
+SILENCE DOES NOT MEAN INVALID. Keep silent management members as is_real_person=true.
+
+=== WHAT TO REJECT (STRICT - ONLY THESE) ===
+
+REJECT ONLY if the entry is clearly NOT A HUMAN PERSON:
+1. DOCUMENT ARTIFACTS: "Scrip Code", "CIN", "ISIN", "NSE Code", "BSE Code", "Page 1 of 16"
+2. GENERIC LABELS: "MANAGEMENT", "ANALYSTS", "Participants", "Speakers", "Business"
+3. JOB TITLES WITHOUT A NAME: "Compliance Officer", "Company Secretary" (title only, no person name)
+4. ABSTRACT NOUNS: "Business", "Industry", "Finance", "Mumbai", city names
+5. SENTENCE FRAGMENTS: "Conference Call. As a reminder...", "Before we begin..."
+
+NEVER REJECT because:
+- "No speaking turn detected" - INVALID rejection reason
+- "Management title listed but no speaking turn" - INVALID rejection reason
+- "Name appears but no speaking turn" - INVALID rejection reason
+
+If the text RESEMBLES A HUMAN NAME (e.g., "Alexander Poempner", "Thomas Kehl"), DO NOT REJECT.
+
+=== SPEAKER CANDIDATES FROM HEURISTICS ===
+
+CANDIDATE 1: "Mumbai"
+  Sample turns:
+    November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Tower...
+
+CANDIDATE 2: "Scrip Code"
+  Sample turns:
+    November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Tower...
+
+CANDIDATE 3: "Sub"
+  Sample turns:
+    November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Tower...
+
+CANDIDATE 4: "MR. HARSH PATEL"
+  Sample turns:
+    November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Tower...
+
+CANDIDATE 5: "MR. NAVEEN KANDPAL"
+  Sample turns:
+    November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Tower...
+
+CANDIDATE 6: "MR. NILESH GANJWALA"
+  Sample turns:
+    November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Tower...
+
+CANDIDATE 7: "Vidhi Vasa"
+  Sample turns:
+    November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Tower...
+
+CANDIDATE 8: "Aalap Patel"
+  Sample turns:
+    November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Tower...
+    next question is from the line of Ajay from Niveshaay.
+Ajay: Sir, is it possible to give the breakup of the order book across segments or even like ma...
+    next question is from the line of Vivek Patel from Ficom Family Office.
+Vivek Patel: Firstly, why has the GLE segment's revenue and margin slowed down...
+
+CANDIDATE 9: "Naveen Kandpal"
+  Sample turns:
+    November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Tower...
+
+CANDIDATE 10: "Dhaval Shah"
+  Sample turns:
+    now begin with the question and answer session. The first question
+is from the line of Dhaval Shah from Girik Capital.
+Dhaval Shah: My question is on ...
+
+CANDIDATE 11: "Nilesh Ganjwala"
+  Sample turns:
+    now begin with the question and answer session. The first question
+is from the line of Dhaval Shah from Girik Capital.
+Dhaval Shah: My question is on ...
+    next question is from the line of Ajay from Niveshaay.
+Ajay: Sir, is it possible to give the breakup of the order book across segments or even like ma...
+    next question is from the line of Vibhav Khandelwal from Laburnum Capital.
+Vibhav Khandelwal: Just wanted to understand a gain on the glass business, ...
+
+CANDIDATE 12: "Harsh Patel"
+  Sample turns:
+    now begin with the question and answer session. The first question
+is from the line of Dhaval Shah from Girik Capital.
+Dhaval Shah: My question is on ...
+    next question is from the line of Ajay from Niveshaay.
+Ajay: Sir, is it possible to give the breakup of the order book across segments or even like ma...
+    next question is from the line of Vivek Patel from Ficom Family Office.
+Vivek Patel: Firstly, why has the GLE segment's revenue and margin slowed down...
+
+CANDIDATE 13: "Ajay"
+  Sample turns:
+    next question is from the line of Ajay from Niveshaay.
+Ajay: Sir, is it possible to give the breakup of the order book across segments or even like ma...
+
+CANDIDATE 14: "So"
+  Sample turns:
+    next question is from the line of Ajay from Niveshaay.
+Ajay: Sir, is it possible to give the breakup of the order book across segments or even like ma...
+
+CANDIDATE 15: "Vibhav Khandelwal"
+  Sample turns:
+    next question is from the line of Vibhav Khandelwal from Laburnum Capital.
+Vibhav Khandelwal: Just wanted to understand a gain on the glass business, ...
+
+CANDIDATE 16: "Vivek Patel"
+  Sample turns:
+    next question is from the line of Vivek Patel from Ficom Family Office.
+Vivek Patel: Firstly, why has the GLE segment's revenue and margin slowed down...
+
+CANDIDATE 17: "Rohan Mehta"
+  Sample turns:
+    next question is from the line of Rohan Mehta from Lelux LLP.
+Rohan Mehta: So I wanted to understand, firstly, where is the order book momentum most p...
+
+CANDIDATE 18: "Vanshita Amlani"
+  Sample turns:
+    next question is from the line of Divya Agrawal from Namo Communications LLP.
+The next question is from the line of Vanshita Amlani from M R Patel Fam...
+
+CANDIDATE 19: "Yug Jhaveri"
+  Sample turns:
+    next question is from the line of Yug Jhaveri from Molecule Ventures.
+Yug Jhaveri: So first question was on the side of order book. So if you see H1 F...
+
+CANDIDATE 20: "Deekshant Boolchandani"
+  Sample turns:
+    next question is from the line of Deekshant Boolchandani from DB Wealth.
+Deekshant Boolchandani: Congrats, Aalap bhai, Harsh bhai. Really good results...
+
+
+=== OPENING REMARKS CONTEXT (first 1500 chars) ===
+November 19, 2025
+To, To,
+The Manager (CRD) The Manager - Listing Department
+BSE Limited National Stock Exchange of India Ltd
+Phiroze Jeejeebhoy Towers, Exchange Plaza, Plot no. C/1, G Block,
+Dalal Street, Fort, Bandra-Kurla Complex, Bandra (East)
+Mumbai - 400 001 Mumbai - 400 051
+Scrip Code: 522215 Symbol : HLEGLAS
+Sub: Transcript of Earnings Call for Q2 & H1 FY26
+Dear Sir/Madam,
+Pursuant to Regulation 30 read with Schedule III of SEBI (Listing Obligations and Disclosure
+Requirements) Regulations, 2015, we hereby enclose the transcript of the Earnings
+conference call held on November 12, 2025 regarding discussion on operational and
+financial performance for the Quarter and Half- Year ended September 30, 2025 (Q2 & H1
+FY 2025-26).
+This same will also be available on the Company's website at www.hleglascoat.com.
+This is for your information and records.
+Thanking You,
+Yours faithfully,
+For HLE Glascoat Limited
+ACHAL S. THAKKAR
+Company Secretary &
+Compliance Officer
+HLE Glascoat Limited
+Q2 & H1 FY '26 Earnings Conference Call
+November 12, 2025
+MANAGEMENT: MR. AALAP PATEL  EXECUTIVE DIRECTOR  HLE
+GLASCOAT LIMITED
+MR. HARSH PATEL  EXECUTIVE DIRECTOR  HLE
+GLASCOAT LIMITED
+MR. NAVEEN KANDPAL  CHIEF FINANCIAL OFFICER
+ HLE GLASCOAT LIMITED
+MR. NILESH GANJWALA  SENIOR ADVISOR  HLE
+GLASCOAT LIMITED
+MODERATOR: MS. VIDHI VASA  MUFG
+
+Moderator: Ladies and gentlemen, good day, and welcome to the HLE Glascoat Limited Q2 and H1 FY '26
+Earnings Conference Call. As a reminder, all participants'
+
+=== Q&A SESSION CONTEXT (first 2000 chars) ===
+next question is from the line of Deekshant Boolchandani from DB Wealth.
+Deekshant Boolchandani: Congrats, Aalap bhai, Harsh bhai. Really good results on the top line and really amazing to see
+that the efforts that we are taking on this up cycle. So the first question is that we have this
+historic vintage in 2018, '19, '20, we had seen this really good up cycle for us, and we were able
+to see those high sort of ROCE numbers. I'm sure that that's like a vision for us even now. How
+is it that we can achieve that sort of growth in this particular cycle?
+
+Nilesh Ganjwala: I think that's a very interesting question, something that we always question ourselves. And I
+think the answer is, again, the same that I just talked about. I think the capacity utilization levels
+in 2019 when we were at a different high in the business was close to about 90%, both across at
+filtration drying as well as in the plant at Anand, which manufactures glass lined equipment.
+We are currently not there, and I'll be honest with that. But we do believe that if this trend
+continues for the next 6 to 12 months, we will be there. And I think that's really what we are all
+aiming for. And all our efforts are focused on that. There is one significant difference compared
+to 2019, which probably makes us even more confident than before, and that is technology. I
+think we haven't probably spoken enough about it on this call. We have mentioned that on
+filtration and drying, we have the technology edge.
+On the glass line equipment, we are in the process of demonstrating our technology advice we
+have the technology emanating from our Thaletec acquisition. The technology is yet being
+communicated and demonstrated to multiple large customers in India. This kind of diffusion of
+knowledge does take time. But once it establishes itself, then it is extremely long term in nature.
+As you can see from our filtration and drying experience where we have been able to maintain
+very, very strong market leadership over de
+
+=== ROLE ASSIGNMENT RULES ===
+Assign roles using CONTEXT, not just speaking turns.
+
+MODERATOR: Manages call flow, introduces speakers (usually "Operator" or "Moderator")
+MANAGEMENT: Listed in management section, has corporate title, OR answers questions
+ANALYST: Introduced by moderator as analyst, OR asks questions
+UNKNOWN: Only if role cannot be inferred - but person is still REAL
+
+Silent management members still get role="management".
+Look at opening remarks for management listings and titles.
+
+=== ALIAS HANDLING RULES (VERY STRICT) ===
+- Canonical name MUST NOT appear in its own alias list
+- Aliases must be DISTINCT textual variants that actually appear in the document
+- DO NOT invent aliases
+- If no real variants exist, aliases must be an empty list []
+
+VALID: canonical_name="Alexander Poempner", aliases=["Mr. Poempner", "Alex Poempner"]
+INVALID: canonical_name="Alexander Poempner", aliases=["Alexander Poempner"] <-- WRONG!
+
+=== OUTPUT FORMAT ===
+Respond with a JSON object:
+{
+  "verified_speakers": [
+    {
+      "canonical_name": "FirstName LastName",
+      "role": "management|analyst|moderator|unknown",
+      "title": "CEO" or null,
+      "company": "Company Name" or null,
+      "aliases": [],
+      "justification": "Why this person was verified"
+    }
+  ],
+  "rejected_candidates": [
+    {"name": "rejected name", "reason": "Document artifact|Generic label|Job title without name|Abstract noun|Sentence fragment"}
+  ],
+  "merge_decisions": [
+    {"merged": ["Name1", "Name2"], "into": "Canonical Name", "reason": "why merged"}
+  ],
+  "confidence": 0.85
+}
+
+DECISION OUTPUT REQUIREMENTS:
+- For every candidate, return EITHER in verified_speakers OR rejected_candidates
+- NEVER silently discard candidates
+- Rejections MUST include an explicit non-person reason
+- VALID rejection reasons: "Document artifact", "Generic label", "Job title without person name", "Abstract noun", "Sentence fragment"
+- INVALID rejection reasons: "No speaking turn detected", "Management title but no speaking turn"
+
+IMPORTANT: Output ONLY valid JSON. No explanations before or after.

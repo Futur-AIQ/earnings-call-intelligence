@@ -1,0 +1,307 @@
+You are building a speaker registry for an earnings call transcript.
+
+=== CRITICAL RULE: WHAT MAKES A REAL PERSON ===
+
+A REAL PERSON does NOT need to have spoken.
+
+If a name appears in ANY of these contexts, they ARE a REAL PERSON:
+- Management lists or opening remarks
+- Participant introductions
+- Moderator announcements ("Next question is from...")
+- Company executive listings
+
+SILENCE DOES NOT MEAN INVALID. Keep silent management members as is_real_person=true.
+
+=== WHAT TO REJECT (STRICT - ONLY THESE) ===
+
+REJECT ONLY if the entry is clearly NOT A HUMAN PERSON:
+1. DOCUMENT ARTIFACTS: "Scrip Code", "CIN", "ISIN", "NSE Code", "BSE Code", "Page 1 of 16"
+2. GENERIC LABELS: "MANAGEMENT", "ANALYSTS", "Participants", "Speakers", "Business"
+3. JOB TITLES WITHOUT A NAME: "Compliance Officer", "Company Secretary" (title only, no person name)
+4. ABSTRACT NOUNS: "Business", "Industry", "Finance", "Mumbai", city names
+5. SENTENCE FRAGMENTS: "Conference Call. As a reminder...", "Before we begin..."
+
+NEVER REJECT because:
+- "No speaking turn detected" - INVALID rejection reason
+- "Management title listed but no speaking turn" - INVALID rejection reason
+- "Name appears but no speaking turn" - INVALID rejection reason
+
+If the text RESEMBLES A HUMAN NAME (e.g., "Alexander Poempner", "Thomas Kehl"), DO NOT REJECT.
+
+=== SPEAKER CANDIDATES FROM HEURISTICS ===
+
+CANDIDATE 1: "MR. ASEEM JOSHI"
+  Sample turns:
+    GMM Pfaudler Limited Q1 FY-23 Earnings
+Conference Call
+July 29, 2022
+MANAGEMENT: MR. TARAK PATEL  MANAGING DIRECTOR
+MR. ASEEM JOSHI  CHIEF EXECUTIVE O...
+    We will now begin the question and answer session. We have the first question
+from the line of Utsav Mehta from Edelweiss AMC. Please go ahead.
+Utsav ...
+    next question from the line of Sanjay Shah from KSA
+Securities. Please go ahead.
+Sanjay Shah: So, my question was regarding our order which we receive...
+
+CANDIDATE 2: "MR. MANISH PODDAR"
+  Sample turns:
+    GMM Pfaudler Limited Q1 FY-23 Earnings
+Conference Call
+July 29, 2022
+MANAGEMENT: MR. TARAK PATEL  MANAGING DIRECTOR
+MR. ASEEM JOSHI  CHIEF EXECUTIVE O...
+    We will now begin the question and answer session. We have the first question
+from the line of Utsav Mehta from Edelweiss AMC. Please go ahead.
+Utsav ...
+    next question from the line of Renjith Sivaram from
+Mahindra Manulife Mutual Fund.
+Renjith Sivaram: Just wanted to check with you, the local CNG gas p...
+
+CANDIDATE 3: "MR. THOMAS KEHL"
+  Sample turns:
+    GMM Pfaudler Limited Q1 FY-23 Earnings
+Conference Call
+July 29, 2022
+MANAGEMENT: MR. TARAK PATEL  MANAGING DIRECTOR
+MR. ASEEM JOSHI  CHIEF EXECUTIVE O...
+    next question from the line of Jaiveer Shikhavat from
+Ambit Capital. Please go ahead.
+Jaiveer Shikhavat: So firstly in terms the order intake could yo...
+    next question from the line Saurabh Shah from AUM
+advisors. Please go ahead.
+Saurabh Shah: The first question on, you know the integration plan when w...
+
+CANDIDATE 4: "MS. MITTAL MEHTA"
+  Sample turns:
+    GMM Pfaudler Limited Q1 FY-23 Earnings
+Conference Call
+July 29, 2022
+MANAGEMENT: MR. TARAK PATEL  MANAGING DIRECTOR
+MR. ASEEM JOSHI  CHIEF EXECUTIVE O...
+
+CANDIDATE 5: "MS. PRIYANKA DAGA"
+  Sample turns:
+    GMM Pfaudler Limited Q1 FY-23 Earnings
+Conference Call
+July 29, 2022
+MANAGEMENT: MR. TARAK PATEL  MANAGING DIRECTOR
+MR. ASEEM JOSHI  CHIEF EXECUTIVE O...
+    GMM Pfaudler Limited Q1 FY-23 Earnings
+Conference Call
+July 29, 2022
+MANAGEMENT: MR. TARAK PATEL  MANAGING DIRECTOR
+MR. ASEEM JOSHI  CHIEF EXECUTIVE O...
+    We will now begin the question and answer session. We have the first question
+from the line of Utsav Mehta from Edelweiss AMC. Please go ahead.
+Utsav ...
+
+CANDIDATE 6: "Compliance Officer"
+  Sample turns:
+    GMM Pfaudler Limited Q1 FY-23 Earnings
+Conference Call
+July 29, 2022
+MANAGEMENT: MR. TARAK PATEL  MANAGING DIRECTOR
+MR. ASEEM JOSHI  CHIEF EXECUTIVE O...
+
+CANDIDATE 7: "Tarak Patel"
+  Sample turns:
+    GMM Pfaudler Limited Q1 FY-23 Earnings
+Conference Call
+July 29, 2022
+MANAGEMENT: MR. TARAK PATEL  MANAGING DIRECTOR
+MR. ASEEM JOSHI  CHIEF EXECUTIVE O...
+    We will now begin the question and answer session. We have the first question
+from the line of Utsav Mehta from Edelweiss AMC. Please go ahead.
+Utsav ...
+    next question from the line of Harshil Shethia from AUM
+Fund Advisors LLP. Please go ahead.
+Harshil Shethia: Can you just throw some highlight on our ...
+
+CANDIDATE 8: "Utsav Mehta"
+  Sample turns:
+    We will now begin the question and answer session. We have the first question
+from the line of Utsav Mehta from Edelweiss AMC. Please go ahead.
+Utsav ...
+
+CANDIDATE 9: "Sandeep Tulsiyan"
+  Sample turns:
+    We will now begin the question and answer session. We have the first question
+from the line of Utsav Mehta from Edelweiss AMC. Please go ahead.
+Utsav ...
+
+CANDIDATE 10: "September"
+  Sample turns:
+    We will now begin the question and answer session. We have the first question
+from the line of Utsav Mehta from Edelweiss AMC. Please go ahead.
+Utsav ...
+
+CANDIDATE 11: "Harshil Shethia"
+  Sample turns:
+    next question from the line of Harshil Shethia from AUM
+Fund Advisors LLP. Please go ahead.
+Harshil Shethia: Can you just throw some highlight on our ...
+
+CANDIDATE 12: "Sanjay Shah"
+  Sample turns:
+    next question from the line of Sanjay Shah from KSA
+Securities. Please go ahead.
+Sanjay Shah: So, my question was regarding our order which we receive...
+
+CANDIDATE 13: "Renjith Sivaram"
+  Sample turns:
+    next question from the line of Renjith Sivaram from
+Mahindra Manulife Mutual Fund.
+Renjith Sivaram: Just wanted to check with you, the local CNG gas p...
+
+CANDIDATE 14: "Rahul Agarwal"
+  Sample turns:
+    next question from the line of Rahul Agarwal from L&T
+Mutual fund. Please go ahead.
+Rahul Agarwal : So just I wanted to understand more in terms of th...
+
+CANDIDATE 15: "Jaiveer Shikhavat"
+  Sample turns:
+    next question from the line of Jaiveer Shikhavat from
+Ambit Capital. Please go ahead.
+Jaiveer Shikhavat: So firstly in terms the order intake could yo...
+
+CANDIDATE 16: "Rohit"
+  Sample turns:
+    next question from the line of Rohit from
+Progressive. Please go ahead.
+Rohit: Two questions or probably 2 parts to that. GMM was probably the only co...
+
+CANDIDATE 17: "Rahul Jain"
+  Sample turns:
+    next question from the line of Rahul Jain from Anand
+Rathi. Please go ahead.
+Rahul Jain: Can you comment on performance of Mavag in Q1 specifically an...
+
+CANDIDATE 18: "Akshay Kothari"
+  Sample turns:
+    next question from the line of Akshay Kothari from
+Envision Capital Services. Please go ahead.
+Akshay Kothari: So do we see any improvement in working...
+
+CANDIDATE 19: "Jiten Parmar"
+  Sample turns:
+    next question from the line of Jiten Parmar from Aurum
+Capital. Please go ahead.
+Jiten Parmar: Yeah, two questions. I think the first one is answered ...
+
+CANDIDATE 20: "Saurabh Shah"
+  Sample turns:
+    next question from the line Saurabh Shah from AUM
+advisors. Please go ahead.
+Saurabh Shah: The first question on, you know the integration plan when w...
+
+
+=== OPENING REMARKS CONTEXT (first 1500 chars) ===
+GMM Pfaudler Limited Q1 FY-23 Earnings
+Conference Call
+July 29, 2022
+MANAGEMENT: MR. TARAK PATEL  MANAGING DIRECTOR
+MR. ASEEM JOSHI  CHIEF EXECUTIVE OFFICER,
+INDIA BUSINESS
+MR. MANISH PODDAR  CHIEF FINANCIAL OFFICER,
+INDIA BUSINESS
+MR. THOMAS KEHL - CHIEF EXECUTIVE OFFICER,
+INTERNATIONAL BUSINESS
+MR. ALEXANDER POMPNER CHIEF FINANCIAL
+OFFICER, INTERNATIONAL BUSINESS
+MS. MITTAL MEHTA  COMPANY SECRETARY &
+COMPLIANCE OFFICER
+MS. PRIYANKA DAGA- DEPUTY GENERAL MANAGER,
+STRATEGIC FINANCE
+
+GMM Pfaudler Limited
+Earnings Conference Call
+July 29, 2022
+Moderator: Ladies and gentlemen, good day and welcome to the Q1 FY23 Conference Call
+of GMM Pfaudler Limited. As a reminder, all participant lines will be in listen only
+mode, and there will be an opportunity for you to ask questions after the
+presentation concludes. Should you need assistance during the conference call,
+please signal an operator by pressing * then 0 on your touchtone phone.
+Please note that this conference is being recorded. I now have the conference
+over to Priyanka Daga. Thank you and over to you, ma'am.
+Priyanka Daga: A very warm welcome to all of you into the Q1 FY23 earnings call of GMM
+Pfaudler limited. The Earnings Presentation was uploaded on the stock
+exchanges and is also, available on our website. Hope all of you had a chance to
+go through it.
+From the management we have with us our Managing Director, Mr. Tarak Patel,
+our CEO of international business. Mr. Thomas Kehl, our CEO of India Business -
+- Mr. Aseem Jo
+
+=== Q&A SESSION CONTEXT (first 2000 chars) ===
+next question from the line of Denzil Rodrigues an
+individual investor. Please go ahead.
+Denzil Rodrigues: I have a couple of generic questions. Can you please share your views on
+continuous flow reactor technologies? Can the reactors be scaled up for large
+scale industry use? Our contribution to it and the opportunity size. Also, have
+you seen any increase in enquiries for your glass-line flow reactors?
+Tarak Patel: So a good question, and not that the generic actually, so continuous flow
+reactors are being talked about definitely more now. But again, replacing batch
+reactor with continuous flow reactors is something that will take a lot of time,
+however we already have technology available within our network of
+continuous flow reactors, we recently had a seminar here in Bombay where we
+were kind of showcasing our capabilities in continuous flow reactors. We also
+have a new company that one of our group companies has acquired in the UK
+that does specific work on continuous flow reaction and filtration as well, but
+that's something that we will continue to build on. Its a nice technology. There
+are a few small Indian companies who are already talking about it. It is really
+being converted to order I can't feel that it has been, but for the future, I think
+it's definitely an area that we should focus on and try to build some technology
+in that area.
+
+Aseem Joshi: Just to add we are monitoring this trend very closely because there's inherent
+advantages to continue flow reactions over batch, and we're ready with the
+product we have a glass line continuous flow reactor, first of its kind in the world
+that we that we offer in fact we have already sold one unit. As in when this
+change picks up and we're ready to serve the market when it comes.
+Moderator: Thank you. I now hand it over to the management for closing comments.
+Tarak Patel: Thank you everybody for this conference call. We'll talk to you again next
+quarter and in the meantime, if you have any further questions,
+
+=== ROLE ASSIGNMENT RULES ===
+Assign roles using CONTEXT, not just speaking turns.
+
+MODERATOR: Manages call flow, introduces speakers (usually "Operator" or "Moderator")
+MANAGEMENT: Listed in management section, has corporate title, OR answers questions
+ANALYST: Introduced by moderator as analyst, OR asks questions
+UNKNOWN: Only if role cannot be inferred - but person is still REAL
+
+Silent management members still get role="management".
+Look at opening remarks for management listings and titles.
+
+=== OUTPUT FORMAT ===
+Respond with a JSON object:
+{
+  "verified_speakers": [
+    {
+      "canonical_name": "FirstName LastName",
+      "role": "management|analyst|moderator|unknown",
+      "title": "CEO" or null,
+      "company": "Company Name" or null,
+      "aliases": [],
+      "justification": "Why this person was verified"
+    }
+  ],
+  "rejected_candidates": [
+    {"name": "rejected name", "reason": "Document artifact|Generic label|Job title without name|Abstract noun|Sentence fragment"}
+  ],
+  "merge_decisions": [
+    {"merged": ["Name1", "Name2"], "into": "Canonical Name", "reason": "why merged"}
+  ],
+  "confidence": 0.85
+}
+
+DECISION OUTPUT REQUIREMENTS:
+- For every candidate, return EITHER in verified_speakers OR rejected_candidates
+- NEVER silently discard candidates
+- Rejections MUST include an explicit non-person reason
+- VALID rejection reasons: "Document artifact", "Generic label", "Job title without person name", "Abstract noun", "Sentence fragment"
+- INVALID rejection reasons: "No speaking turn detected", "Management title but no speaking turn"
+- Aliases must be distinct textual variants that appear in the document. Canonical name must NOT appear in its own alias list.
+
+IMPORTANT: Output ONLY valid JSON. No explanations before or after.

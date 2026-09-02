@@ -1,0 +1,197 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 25% 97%;
+    --foreground: 226 80% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 226 80% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 226 80% 10%;
+    --primary: 226 80% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 208 58% 81%;
+    --secondary-foreground: 226 80% 20%;
+    --muted: 210 25% 93%;
+    --muted-foreground: 220 15% 45%;
+    --accent: 208 58% 92%;
+    --accent-foreground: 226 80% 28%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 210 30% 88%;
+    --input: 210 30% 88%;
+    --ring: 226 80% 28%;
+    --radius: 0.625rem;
+
+    /* Role-specific colors */
+    --moderator: 280 60% 60%;
+    --moderator-foreground: 0 0% 100%;
+    --management: 210 70% 50%;
+    --management-foreground: 0 0% 100%;
+    --analyst: 150 60% 40%;
+    --analyst-foreground: 0 0% 100%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, .font-display {
+    font-family: 'DM Serif Display', Georgia, serif;
+  }
+
+  h2, h3 {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-weight: 600;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted rounded;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded hover:bg-muted-foreground/30;
+  }
+}
+
+@layer components {
+  /* Question/Answer blocks */
+  .qa-question {
+    @apply border-l-4 border-green-500 pl-4 py-2 bg-green-50/50 dark:bg-green-950/20;
+  }
+
+  .qa-answer {
+    @apply border-l-4 border-blue-500 pl-4 py-2 bg-blue-50/50 dark:bg-blue-950/20;
+  }
+
+  /* Trace decision blocks */
+  .trace-decision {
+    @apply border-l-2 border-amber-400 pl-4 py-3 bg-amber-50/30 dark:bg-amber-950/20;
+  }
+
+  /* Evidence highlight */
+  .evidence-highlight {
+    @apply bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded;
+  }
+
+  /* Status indicators */
+  .status-dot {
+    @apply w-2 h-2 rounded-full inline-block mr-2;
+  }
+
+  .status-dot-completed {
+    @apply bg-green-500;
+  }
+
+  .status-dot-running {
+    @apply bg-blue-500 animate-pulse;
+  }
+
+  .status-dot-failed {
+    @apply bg-red-500;
+  }
+
+  .status-dot-queued {
+    @apply bg-yellow-500;
+  }
+}
+
+/* Animation for smooth transitions */
+@layer utilities {
+  .transition-height {
+    transition: height 0.2s ease-out;
+  }
+}
+
+/* Grid background for main content area */
+.grid-bg {
+  background-image:
+    radial-gradient(ellipse at 10% 10%, rgba(14, 41, 128, 0.04) 0%, transparent 65%),
+    linear-gradient(rgba(14, 41, 128, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 41, 128, 0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 36px 36px, 36px 36px;
+}
+
+/* Sidebar width transition */
+.sidebar-transition {
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Header shadow on scroll */
+.header-shadow {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.dark .header-shadow {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+}
+
+/* Skeleton shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted-foreground) / 0.08) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Soft pulse for running status */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Login page left panel - dark navy with subtle texture */
+.login-panel-bg {
+  background-color: hsl(222.2, 47.4%, 11.2%);
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
