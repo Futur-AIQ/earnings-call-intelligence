@@ -64,10 +64,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS - allow dev server and any origin when serving static files
+# CORS - dev origins always allowed; extra origins (e.g. the deployed Vercel
+# domain) come from CORS_ORIGINS, a comma-separated list. "*" is not used
+# because it's invalid alongside allow_credentials=True per the CORS spec.
+_default_origins = ["http://localhost:5173", "http://localhost:3000"]
+_extra_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "*"],
+    allow_origins=_default_origins + _extra_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

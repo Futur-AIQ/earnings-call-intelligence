@@ -22,8 +22,11 @@ import type {
   ChatStreamDone,
 } from '@/types/api';
 
-// Base URL for API calls (proxied through Vite in dev)
-const API_BASE = '/api';
+// Base URL for API calls. In dev this stays '/api' and is proxied through Vite
+// (see vite.config.ts) to the local backend. In production (e.g. deployed to
+// Vercel with the backend on a different Render domain), set VITE_API_URL to
+// the backend's full origin, e.g. https://your-app.onrender.com/api.
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 // =============================================================================
 // Token Management

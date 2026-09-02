@@ -222,6 +222,15 @@ rm -rf backend/data/uploads/*         # delete uploads
 curl -X DELETE http://localhost:8100/runs/{run_id}
 ```
 
+## Deployment (Vercel frontend + Render backend)
+
+- **`render.yaml`** (repo root) defines the backend web service. Build command is `pip install -e . && pip install -r backend/requirements.txt` — both are needed because `backend/services/pipeline_runner.py` imports the root `src/` package at runtime (via `sys.path.insert`), and `backend/requirements.txt` alone doesn't carry `src/`'s dependencies (`langgraph`, `pydantic-settings`, `tiktoken`, `rapidfuzz`, `structlog`, `tenacity`). Start command is `cd backend && python main.py`, which already binds `0.0.0.0` and reads `$PORT`.
+- **`frontend/vercel.json`** adds the SPA rewrite (`/* → /index.html`) Vite apps need on Vercel so client-side routes don't 404 on refresh. Set the Vercel project's root directory to `frontend/`.
+- **`VITE_API_URL`** (frontend, Vercel env var) — `frontend/src/api/client.ts` reads this for the API base URL, falling back to `/api` for local dev (proxied by Vite). Must be set to the deployed backend's origin + `/api`, e.g. `https://<service>.onrender.com/api`.
+- **`CORS_ORIGINS`** (backend, Render env var) — comma-separated list appended to the dev origins in `backend/main.py`'s CORS middleware. Set to the deployed Vercel domain(s) once known.
+- **`JWT_SECRET_KEY`** must be set on Render — `api/auth.py` raises at import time if it's missing, which crashes the whole app (not just auth routes).
+- **Known limitation, accepted as-is**: `backend/data/uploads` and `backend/data/runs` are plain local disk (see Data Storage above). Render's default web service disk is ephemeral — uploads and analysis results are lost on every redeploy or restart. No persistent disk or object storage is wired up; revisit if this needs to survive deploys.
+
 ## Known Issues
 
 1. **Windows console encoding** — avoid Unicode chars in console output; use `.encode('ascii', errors='replace')`.

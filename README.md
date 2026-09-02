@@ -256,6 +256,18 @@ rm -rf backend/data/uploads/*
 
 ---
 
+## Deployment
+
+The backend deploys to **Render** (`render.yaml`) and the frontend to **Vercel** (`frontend/vercel.json`, root directory set to `frontend/`).
+
+Required env vars:
+- Render: `JWT_SECRET_KEY` (app won't boot without it), `CORS_ORIGINS` (comma-separated, set to your Vercel domain), plus `OPENROUTER_API_KEY` and the MySQL vars from Quick Start above.
+- Vercel: `VITE_API_URL` set to `https://<your-render-service>.onrender.com/api`.
+
+**Note**: uploads and run data are stored on local disk (see Data Management below), which Render's default web service wipes on every redeploy/restart — there's no persistent disk or object storage configured yet.
+
+---
+
 ## Known Limitations
 
 - **`gpt-oss-20b` EOS loops** — the model occasionally returns empty responses on certain prompt content, even via OpenRouter. The pipeline handles this with retries and a `google/gemma-3-27b-it` fallback, but a ~5% failure rate on individual blocks is normal. The chatbot has no model fallback — an empty response there is retried once with a simplified prompt.
